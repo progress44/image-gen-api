@@ -40,7 +40,7 @@ def _docs_url(path: str) -> str | None:
 app = FastAPI(
     title="Image Generation API",
     description="OpenAI-compatible image generation API",
-    version="1.0.0",
+    version="1.1.0",
     docs_url=_docs_url("/docs"),
     redoc_url=_docs_url("/redoc"),
     lifespan=lifespan,
