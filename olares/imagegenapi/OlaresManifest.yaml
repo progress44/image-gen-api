@@ -1,0 +1,97 @@
+olaresManifest.version: "0.11.0"
+olaresManifest.type: app
+metadata:
+  name: imagegenapi
+  description: Private image generation API powered by Stable Diffusion XL.
+  icon: https://avatars.githubusercontent.com/u/139895814?s=200&v=4
+  appid: imagegenapi
+  title: Image Generation API
+  version: "1.0.0"
+  categories:
+    - AI
+    - Utilities
+    - Developer Tools
+permission:
+  appData: true
+  appCache: true
+  userData:
+    - Home
+spec:
+  versionName: "gpu-cu128"
+  fullDescription: |
+    Image Generation API exposes OpenAI-style image generation endpoints on Olares.
+
+    Endpoints
+    - `GET /`
+      - Returns service metadata and model initialization state.
+    - `GET /health`
+      - Returns runtime health and model loading status.
+    - `GET /v1/models`
+      - Returns the configured model id.
+    - `POST /v1/images/generations`
+      - OpenAI-style image generation endpoint.
+      - Request fields:
+        - `model` (must be `stabilityai/stable-diffusion-xl-base-1.0`)
+        - `prompt` (required)
+        - `size` (`WIDTHxHEIGHT`, default `1024x1024`)
+        - `response_format` (`url` or `b64_json`)
+        - `negative_prompt` (optional)
+        - `num_inference_steps` (optional)
+        - `guidance_scale` (optional)
+        - `seed` (optional)
+    - `GET /v1/images/{image_id}`
+      - Serves generated images when `response_format=url`.
+
+    Example request
+    - `curl -X POST http://imagegenapi-svc:8001/v1/images/generations -H "Content-Type: application/json" -d '{"model":"stabilityai/stable-diffusion-xl-base-1.0","prompt":"a cinematic mountain landscape at sunrise","size":"1024x1024","response_format":"url"}'`
+
+    Notes
+    - First request may be slow while model weights are pulled into app data.
+    - Hugging Face and torch caches are persisted under `userspace.appData`.
+    - Generated image files are persisted under `userspace.appData/outputs`.
+    - This package targets `amd64` Olares nodes with NVIDIA GPU support.
+  developer: progress44
+  website: https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0
+  sourceCode: https://github.com/progress44/rpi-system
+  submitter: progress44
+  doc: https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0
+  license:
+    - text: OpenRAIL++
+      url: https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0
+  locale:
+    - en-US
+  requiredMemory: 12Gi
+  limitedMemory: 12Gi
+  requiredDisk: 5Gi
+  limitedDisk: 40Gi
+  requiredCpu: 4
+  limitedCpu: 4
+  requiredGpu: 12Gi
+  limitedGpu: 16Gi
+  supportArch:
+    - amd64
+options:
+  apiTimeout: 0
+  dependencies:
+    - name: olares
+      type: system
+      version: ">=1.12.1-0"
+envs:
+  - envName: OLARES_USER_HUGGINGFACE_TOKEN
+    required: false
+    applyOnChange: true
+    valueFrom:
+      envName: OLARES_USER_HUGGINGFACE_TOKEN
+  - envName: OLARES_USER_HUGGINGFACE_SERVICE
+    required: false
+    applyOnChange: true
+    valueFrom:
+      envName: OLARES_USER_HUGGINGFACE_SERVICE
+entrances:
+  - name: imagegenapi
+    port: 8001
+    host: imagegenapi-svc
+    title: Image Generation API
+    icon: https://avatars.githubusercontent.com/u/139895814?s=200&v=4
+    authLevel: internal
+    openMethod: window

@@ -1,0 +1,28 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: imagegenapi-config
+  namespace: {{ .Release.Namespace }}
+data:
+  PORT: {{ .Values.service.port | quote }}
+  HOST: "0.0.0.0"
+  IMAGE_MODEL_ID: {{ .Values.imagegen.modelId | quote }}
+  IMAGE_DEVICE: {{ .Values.imagegen.device | quote }}
+  IMAGE_TORCH_DTYPE: {{ .Values.imagegen.torchDtype | quote }}
+  IMAGE_DEFAULT_STEPS: {{ .Values.imagegen.defaultSteps | quote }}
+  IMAGE_MAX_STEPS: {{ .Values.imagegen.maxSteps | quote }}
+  IMAGE_MAX_WIDTH: {{ .Values.imagegen.maxWidth | quote }}
+  IMAGE_MAX_HEIGHT: {{ .Values.imagegen.maxHeight | quote }}
+  IMAGE_ENABLE_DOCS: {{ .Values.imagegen.enableDocs | quote }}
+  IMAGE_OUTPUT_FORMAT: {{ .Values.imagegen.outputFormat | quote }}
+  IMAGE_OUTPUT_DIR: /data/outputs
+  HF_HOME: /data/huggingface
+  HF_ENDPOINT: {{ .Values.olaresEnv.OLARES_USER_HUGGINGFACE_SERVICE | default "https://huggingface.co/" | quote }}
+  HF_TOKEN: {{ .Values.olaresEnv.OLARES_USER_HUGGINGFACE_TOKEN | default "" | quote }}
+  HUGGING_FACE_HUB_TOKEN: {{ .Values.olaresEnv.OLARES_USER_HUGGINGFACE_TOKEN | default "" | quote }}
+  HF_HUB_CACHE: /data/huggingface/hub
+  TRANSFORMERS_CACHE: /data/huggingface/transformers
+  TORCH_HOME: /data/torch
+  NVIDIA_VISIBLE_DEVICES: {{ .Values.imagegen.nvidiaVisibleDevices | quote }}
+  NVIDIA_DRIVER_CAPABILITIES: {{ .Values.imagegen.nvidiaDriverCapabilities | quote }}
