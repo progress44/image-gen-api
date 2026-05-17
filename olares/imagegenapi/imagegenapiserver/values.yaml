@@ -1,0 +1,20 @@
+image:
+  repository: ghcr.io/progress44/rpi-system-image-gen-api
+  tag: latest
+  pullPolicy: Always
+
+service:
+  port: 8001
+
+imagegen:
+  modelId: stabilityai/stable-diffusion-xl-base-1.0
+  device: cuda
+  torchDtype: auto
+  defaultSteps: "30"
+  maxSteps: "80"
+  maxWidth: "1536"
+  maxHeight: "1536"
+  enableDocs: "true"
+  outputFormat: png
+  nvidiaVisibleDevices: all
+  nvidiaDriverCapabilities: compute,utility
