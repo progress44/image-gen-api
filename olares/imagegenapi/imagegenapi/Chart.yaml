@@ -1,0 +1,6 @@
+apiVersion: v2
+name: imagegenapi
+description: User-space API entrance for shared Imogen image generation API
+type: application
+version: 1.2.0
+appVersion: "1.25.3-2"

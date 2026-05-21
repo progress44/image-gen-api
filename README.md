@@ -1,4 +1,4 @@
-# Image Generation API
+# Imogen Image Generation API
 
 FastAPI wrapper that exposes OpenAI-style image generation endpoints backed by
 Diffusers.
@@ -24,6 +24,15 @@ curl -X POST http://localhost:8001/v1/images/generations \
   }'
 ```
 
+## Olares Packaging
+
+The Olares chart packages Imogen as a shared application:
+
+- Admin install: one shared GPU-backed backend for the cluster.
+- User install: a lightweight user-space API entrance that proxies to the shared backend.
+- Shared endpoint: `http://imagegenapi.shared.olares.com`
+- User endpoint: `https://imagegenapi.{OlaresID}.olares.com`
+
 ## Environment Variables
 
 - `HOST` (default: `0.0.0.0`)
@@ -38,4 +47,3 @@ curl -X POST http://localhost:8001/v1/images/generations \
 - `IMAGE_MAX_HEIGHT` (default: `1536`)
 - `IMAGE_OUTPUT_DIR` (default: `/data/outputs`)
 - `IMAGE_OUTPUT_FORMAT` (`png|jpeg|jpg`, default: `png`)
-

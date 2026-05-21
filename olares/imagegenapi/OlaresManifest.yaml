@@ -1,25 +1,46 @@
 olaresManifest.version: "0.11.0"
 olaresManifest.type: app
+apiVersion: "v2"
 metadata:
   name: imagegenapi
-  description: Private image generation API powered by Stable Diffusion XL.
+  description: Shared Imogen image generation API powered by Stable Diffusion XL.
   icon: https://avatars.githubusercontent.com/u/139895814?s=200&v=4
   appid: imagegenapi
-  title: Image Generation API
+  title: Imogen Image Generation API
   version: "1.2.0"
   categories:
     - AI
     - Utilities
     - Developer Tools
+sharedEntrances:
+  - name: imagegenapi
+    title: Imogen API
+    host: sharedentrances-imogen
+    icon: https://avatars.githubusercontent.com/u/139895814?s=200&v=4
+    port: 0
+    invisible: true
+    authLevel: internal
+entrances:
+  - name: imagegenapi
+    port: 8080
+    host: imagegenapi-web-svc
+    title: Imogen API
+    icon: https://avatars.githubusercontent.com/u/139895814?s=200&v=4
+    authLevel: internal
+    openMethod: window
 permission:
   appData: true
   appCache: true
+{{- if and .Values.admin .Values.bfl.username (eq .Values.admin .Values.bfl.username) }}
   userData:
     - Home
+{{- end }}
 spec:
   versionName: "gpu-cu128"
   fullDescription: |
-    Image Generation API exposes OpenAI-style image generation endpoints on Olares.
+    Imogen Image Generation API exposes OpenAI-style image generation endpoints on Olares.
+
+    This is the shared Olares package. The administrator installs one shared Imogen backend for the cluster, while each user installs a lightweight user-space API entrance that proxies to that shared backend.
 
     Endpoints
     - `GET /`
@@ -42,13 +63,17 @@ spec:
     - `GET /v1/images/{image_id}`
       - Serves generated images when `response_format=url`.
 
+    Olares endpoints
+    - Shared app-to-app endpoint: `http://imagegenapi.shared.olares.com`
+    - User-space endpoint: `https://imagegenapi.{OlaresID}.olares.com`
+
     Example request
-    - `curl -X POST http://imagegenapi-svc:8001/v1/images/generations -H "Content-Type: application/json" -d '{"model":"stabilityai/stable-diffusion-xl-base-1.0","prompt":"a cinematic mountain landscape at sunrise","size":"1024x1024","response_format":"url"}'`
+    - `curl -X POST http://imagegenapi.shared.olares.com/v1/images/generations -H "Content-Type: application/json" -d '{"model":"stabilityai/stable-diffusion-xl-base-1.0","prompt":"a cinematic mountain landscape at sunrise","size":"1024x1024","response_format":"url"}'`
 
     Notes
     - First request may be slow while model weights are pulled into app data.
-    - Hugging Face and torch caches are persisted under `userspace.appData`.
-    - Generated image files are persisted under `userspace.appData/outputs`.
+    - Hugging Face and torch caches are persisted by the shared backend installation.
+    - Generated image files are persisted by the shared backend under `outputs`.
     - This package targets `amd64` Olares nodes with NVIDIA GPU support.
   developer: progress44
   website: https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0
@@ -60,6 +85,7 @@ spec:
       url: https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0
   locale:
     - en-US
+{{- if and .Values.admin .Values.bfl.username (eq .Values.admin .Values.bfl.username) }}
   requiredMemory: 12Gi
   limitedMemory: 12Gi
   requiredDisk: 5Gi
@@ -68,14 +94,42 @@ spec:
   limitedCpu: 4
   requiredGpu: 12Gi
   limitedGpu: 16Gi
+{{- else }}
+  requiredMemory: 64Mi
+  limitedMemory: 256Mi
+  requiredDisk: 1Mi
+  limitedDisk: 100Mi
+  requiredCpu: 10m
+  limitedCpu: 100m
+{{- end }}
   supportArch:
     - amd64
+  subCharts:
+    - name: imagegenapiserver
+      shared: true
+    - name: imagegenapi
 options:
   apiTimeout: 0
   dependencies:
     - name: olares
       type: system
-      version: ">=1.12.1-0"
+      version: ">=1.12.3-0"
+{{- if and .Values.admin .Values.bfl.username (eq .Values.admin .Values.bfl.username) }}
+{{- else }}
+    - name: imagegenapi
+      type: application
+      version: ">=1.2.0"
+      mandatory: true
+{{- end }}
+  appScope:
+{{- if and .Values.admin .Values.bfl.username (eq .Values.admin .Values.bfl.username) }}
+    clusterScoped: true
+    appRef:
+      - imagegenapi
+{{- else }}
+    clusterScoped: false
+{{- end }}
+{{- if and .Values.admin .Values.bfl.username (eq .Values.admin .Values.bfl.username) }}
 envs:
   - envName: OLARES_USER_HUGGINGFACE_TOKEN
     required: false
@@ -87,11 +141,4 @@ envs:
     applyOnChange: true
     valueFrom:
       envName: OLARES_USER_HUGGINGFACE_SERVICE
-entrances:
-  - name: imagegenapi
-    port: 8001
-    host: imagegenapi-svc
-    title: Image Generation API
-    icon: https://avatars.githubusercontent.com/u/139895814?s=200&v=4
-    authLevel: internal
-    openMethod: window
+{{- end }}

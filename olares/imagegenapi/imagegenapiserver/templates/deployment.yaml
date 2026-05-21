@@ -1,8 +1,9 @@
+{{- if and .Values.admin .Values.bfl.username (eq .Values.admin .Values.bfl.username) }}
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}
+  name: imagegenapi
   namespace: {{ .Release.Namespace }}
   labels:
     app: imagegenapi
@@ -125,3 +126,19 @@ spec:
       protocol: TCP
       port: {{ .Values.service.port }}
       targetPort: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sharedentrances-imogen
+  namespace: {{ .Release.Namespace }}
+spec:
+  type: ClusterIP
+  selector:
+    app: imagegenapi
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: http
+{{- end }}
